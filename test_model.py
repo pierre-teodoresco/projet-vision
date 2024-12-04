@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 
 # Répertoires des données
 NOISY_FOLDER = "dataset/Noisy_folder"
-GROUND_TRUTH_FOLDER = "dataset/Ground_truth"
+GROUND_TRUTH = "dataset/Ground_truth"
 MODEL_PATH = "autoencoder_denoise.h5"
 
 # Paramètres
@@ -23,7 +23,7 @@ def load_images(folder):
         images.append(img_array)
     return np.array(images)
 
-def display_results(noisy_images, clean_images, denoised_images, n=5):
+def display_results(noisy_images, clean_images, denoised_images, n=10):
     """
     Affiche les résultats pour un sous-ensemble d'images.
     """
@@ -60,7 +60,7 @@ def main():
     
     # Charger les données de test
     noisy_images = load_images(NOISY_FOLDER)
-    clean_images = load_images(GROUND_TRUTH_FOLDER)
+    clean_images = load_images(GROUND_TRUTH)
     _, X_test, _, Y_test = train_test_split(noisy_images, clean_images, test_size=0.2, random_state=42)
 
     # Prédictions sur les données de test
