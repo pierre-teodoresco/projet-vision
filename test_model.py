@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+import math
 
 # Répertoires des données
 NOISY_FOLDER = "dataset/Noisy_folder"
@@ -24,9 +26,6 @@ def load_images(folder):
     return np.array(images)
 
 def display_results(noisy_images, clean_images, denoised_images, n=10):
-    """
-    Affiche les résultats pour un sous-ensemble d'images.
-    """
     for i in range(n):
         plt.figure(figsize=(12, 4))
         
@@ -50,6 +49,11 @@ def display_results(noisy_images, clean_images, denoised_images, n=10):
         
         plt.show()
 
+def calculate_psnr(mse, max_pixel_value=1.0):
+    if mse == 0:
+        return float('inf')  # Valeur idéale
+    return 20 * math.log10(max_pixel_value) - 10 * math.log10(mse)
+
 def main():
     # Charger le modèle avec compile=False
     model = load_model(MODEL_PATH, compile=False)
@@ -65,6 +69,22 @@ def main():
 
     # Prédictions sur les données de test
     denoised_images = model.predict(X_test)
+
+    # Calcul du MSE et PSNR
+    mse_values = []
+    psnr_values = []
+
+    for i in range(len(Y_test)):
+        mse = mean_squared_error(Y_test[i].flatten(), denoised_images[i].flatten())
+        psnr = calculate_psnr(mse)
+        mse_values.append(mse)
+        psnr_values.append(psnr)
+
+    average_mse = np.mean(mse_values)
+    average_psnr = np.mean(psnr_values)
+
+    print(f"MSE moyen sur le dataset de test : {average_mse}")
+    print(f"PSNR moyen sur le dataset de test : {average_psnr}")
 
     # Afficher quelques résultats
     display_results(X_test, Y_test, denoised_images)
